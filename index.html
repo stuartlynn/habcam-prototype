@@ -27,8 +27,11 @@
             currentMarker.set = paper.set();
           }
 
-          x=evn.clientX;
-          y=evn.clientY;
+
+          console.log("left and right ", evn.target.offsetLeft, evn.target.offsetTop)
+
+          x= evn.pageX - $("#target").offset().left;
+          y= evn.pageY - $("#target").offset().top;
 
 
           circle= paper.circle(x,y,5);
