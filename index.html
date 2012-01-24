@@ -1,0 +1,203 @@
+<html>
+  <head>
+  <script type="text/javascript" src="raphael-min.js"></script>
+  <script type="text/javascript" src="jquery.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      
+      paper = Raphael("target", "100%", "100%");
+      stage = 0;
+      
+      markers=[];
+
+      currentMarker = null;
+
+
+      $("#target").click(function(evn){
+
+          console.log(evn);
+          if (stage ==0 ){
+            if (currentMarker !=null){
+              id = currentMarker.id+1 
+            }
+            else{
+              id=0
+            }
+            createMarker(id);
+            currentMarker.set = paper.set();
+          }
+
+          x=evn.clientX;
+          y=evn.clientY;
+
+
+          circle= paper.circle(x,y,5);
+
+          currentMarker.points[stage]= [x,y, circle];
+          currentMarker.set.push(circle);
+
+          circle.attr("fill", "#e05812");
+          circle.attr("stroke", "white");
+          circle.attr("stroke-width", "3");
+          circle.attr("z-index","10");
+
+          if(stage==1 || stage ==3){
+            oldPoint = currentMarker.points[stage-1];
+            console.log(oldPoint);
+            console.log(x);
+            console.log(y);
+            console.log("m"+oldPoint[0]+","+oldPoint[1]+"l"+x+","+y+"z");
+            line = paper.path("m"+oldPoint[0]+","+oldPoint[1]+"l"+(x-oldPoint[0])+","+(y-oldPoint[1])+"z");
+            line.attr("stroke","white");
+            line.attr("stroke-width","3");
+            currentMarker.set.push(line);
+
+            currentMarker.lines.push(line);
+          }
+
+
+          stage+=1; 
+
+          if(stage ==4){
+            // currentMarker.points[0][2].attr("opacity", 0);
+            // currentMarker.points[1][2].attr("opacity", 0);
+            // currentMarker.points[2][2].attr("opacity", 0);
+            // currentMarker.points[3][2].attr("opacity", 0);
+            currentMarker.lines[0].attr("opacity",0);
+            currentMarker.lines[1].attr("opacity",0);
+            
+
+            grad1 = (currentMarker.points[0][1] - currentMarker.points[1][1])/(currentMarker.points[0][0]- currentMarker.points[1][0])
+
+            grad2 = (currentMarker.points[2][1] - currentMarker.points[3][1])/(currentMarker.points[2][0]- currentMarker.points[3][0])
+
+            point_tmp1 = currentMarker.points[0];
+            point_tmp2 = currentMarker.points[2];
+    
+            xCent = ((point_tmp2[1]-point_tmp1[1])*1.0 + (grad1*point_tmp1[0]- grad2*point_tmp2[0]))/(grad1-grad2);
+            yCent = grad1*(xCent - point_tmp1[0])*1.0 + point_tmp1[1];
+
+
+
+            amin = Raphael.animation({cx: xCent, cy: yCent}, 200, function(){
+               
+               createCentralMarker(x,y,id);
+               currentMarker.set.push(cent);
+               
+               
+               stage =0 
+
+            });
+
+             currentMarker.points[0][2].animate(amin);
+             currentMarker.points[1][2].animate(amin);
+             currentMarker.points[2][2].animate(amin);
+             currentMarker.points[3][2].animate(amin);
+
+        }
+          
+        
+           
+            
+      });
+
+      function createCentralMarker(x,y,id){
+
+        cent= paper.circle(xCent,yCent,10);
+               cent.attr("fill", "#e05812");
+               cent.attr("stroke", "white");
+               cent.attr("stroke-width", "3");
+               cent.attr("z-index", "11");
+
+               cent.data('id',id);  
+
+        cent.drag(function(){
+                 cx
+               },
+               function(){
+                  this.startX= this.attr("cx")
+                  this.startY= this.attr("cy")
+               });
+                                   
+         cent.hover(function(){
+                 explodeMarker(id);
+               },
+               function(){
+                collapseMarker(id);
+               });
+
+
+               currentMarker.cent =cent;
+      }
+
+     
+      function collapseMarker(id){
+         marker = markers[id];
+         console.log(marker.cent);
+        for(var i=0; i< 4 ; i++){
+          marker.points[i][2].animate({cx: marker.cent.attrs.cx , cy: marker.cent.attrs.cy},200);
+        }
+
+        for(var i=0; i < 2 ; i++){
+          marker.lines[i].animate({"opacity": 0}, 200);
+        }
+
+      }
+
+      function explodeMarker(id){
+
+        marker = markers[id];
+
+        for(var i=0; i< 4 ; i++){
+          marker.points[i][2].animate({cx: marker.points[i][0] , cy: marker.points[i][1]},200);
+        }
+
+        for(var i=0; i < 2 ; i++){
+          marker.lines[i].animate({"opacity": 1}, 200);
+        }
+
+
+      }
+  
+      function createMarker(id){
+        currentMarker =  {id: id, points:[], lines:[] };
+        markers.push(currentMarker);
+      }
+
+    });
+  </script>
+
+  <style>
+    #target {
+      width  : 1280px;
+      height : 1014px;
+      position: relative;
+    }
+
+
+
+  #target svg{
+    position:absolute;
+    top:0px;
+      left:0px;
+  }
+
+  #target_img{
+    background-image: url("fishy.png");
+    width:100%;
+    height:100%;
+    z-index : -2;
+    position: absolute;
+    top:0px;
+    left:0px;
+  }
+  
+  </style>
+  </head>
+
+  <body>
+    <div id= 'target' >
+      <div id='target_img'></img>
+    </div>
+  </body>
+</html>
