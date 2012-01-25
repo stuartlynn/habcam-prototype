@@ -147,6 +147,8 @@
               }
               markers[id].cent.remove();
               $(".marker_"+id).remove();
+
+              markable=true;
           });
 
           buttons.append(edit_button).append(delete_button);
@@ -184,7 +186,7 @@
                   var id = this.data('id');
 
                   if(markers[id].draggable==false) {return} ;
-                  this.startX= this.attr("cx")
+                    this.startX= this.attr("cx")
                   this.startY= this.attr("cy")
                },
 
@@ -219,7 +221,7 @@
      
       function collapseMarker(id){
          markable=true;
-
+         marker.cent.attr("cursor","default");
          marker = markers[id];
          marker.draggable=false;
         for(var i=0; i< 4 ; i++){
@@ -237,7 +239,9 @@
 
       function explodeMarker(id){
         markable=false;
+
         marker = markers[id];
+        marker.cent.attr("cursor","move");
         marker.draggable=true;
 
         for(var i=0; i< 4 ; i++){
@@ -282,6 +286,7 @@
     z-index:2000;
     width:58px;
     height:28px;
+    cursor: pointer;
   }
 
   .edit_button{
